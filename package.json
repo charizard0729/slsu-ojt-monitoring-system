@@ -17,12 +17,12 @@
     "url": "https://github.com/charizard0729/internship-backend/issues"
   },
   "homepage": "https://github.com/charizard0729/internship-backend#readme",
-  "dependencies": {
+"dependencies": {
   "cors": "^2.8.5",
   "dotenv": "^17.2.3",
   "express": "^5.1.0",
   "nodemailer": "^7.0.10",
   "sqlite3": "^5.1.7",
-  "multer": "^1.4.5"
+  "multer": "^2.0.2"
 }
 }
