@@ -1133,8 +1133,14 @@ app.delete('/api/faqs/:id', (req, res) => {
   });
 });
 
-// Make sure the PUT endpoint /api/faqs/:id accepts and updates the question field.
+app.get('/', (req, res) => {
+  res.send('SLSU OJT Monitoring System is running!');
+});
 
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 
 app.listen(4000, () => console.log('Server running on port 4000'));
