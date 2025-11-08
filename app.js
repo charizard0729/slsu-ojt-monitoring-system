@@ -2,12 +2,19 @@
 
 const express = require('express');
 require('dotenv').config();
+const cors = require("cors");
 const app = express(); 
+
 
 
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(cors({
+  origin: ["https://slsu-ojt-monitoring-frontend.onrender.com/"], // Replace with your actual frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  credentials: true
+}));
 
 
 const sqlite3 = require('sqlite3').verbose();
