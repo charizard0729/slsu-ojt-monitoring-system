@@ -1,61 +1,34 @@
+
+
 const express = require('express');
-const path = require('path');
-const dotenv = require('dotenv');
+require('dotenv').config();
+const app = express(); 
+
+
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const nodemailer = require("nodemailer");
+const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
-
-dotenv.config();
-
-const app = express();
-const PORT = process.env.PORT || 4000;
-
-// Middleware to parse JSON and URL-encoded data
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
-app.use(cors());
-
-// Setup uploads directory and Multer storage
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
 const storage = multer.diskStorage({
-destination: (req, file, cb) => cb(null, uploadDir),
-filename: (req, file, cb) => {
-const orig = file.originalname || 'file';
-const safe = orig.replace(/\s+/g, '').replace(/[^A-Za-z0-9.-]/g, '');
-const prefix = (file.fieldname || 'file').replace(/[^A-Za-z0-9_-]/g, '');
-cb(null, ${prefix}-${Date.now()}-${safe});
-}
-});
-const upload = multer({ storage });
-
-// Serve static frontend files
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Route for homepage
-app.get('/', (req, res) => {
-res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Example upload route
-app.post('/upload', upload.single('file'), (req, res) => {
-if (!req.file) return res.status(400).send('No file uploaded.');
-res.json({ message: 'File uploaded successfully', filename: req.file.filename });
-});
-
-// Example SQLite connection
-const db = new sqlite3.Database('./internship_new.db', (err) => {
-if (err) console.error('Database connection error:', err.message);
-else console.log('Connected to SQLite database.');
-});
-
-// Start server
-app.listen(PORT, () => {
-console.log(Server running on port ${PORT});
-});
+  destination: (req, file, cb) => cb(null, uploadDir),
+   filename: (req, file, cb) => {
+     const orig = file.originalname || 'file';
+     const safe = orig.replace(/\s+/g, '_').replace(/[^A-Za-z0-9_.-]/g, '');
+     const prefix = (file.fieldname || 'file').replace(/[^A-Za-z0-9_-]/g, '');
+     cb(null, `${prefix}-${Date.now()}-${safe}`);
+   }
+ });
+ const upload = multer({ storage });
+app.use(cors());
 
 console.log('Using database at:', path.resolve('./internship_new.db'));
 
@@ -1172,6 +1145,18 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve index.html on root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 app.listen(4000, () => console.log('Server running on port 4000'));
 
