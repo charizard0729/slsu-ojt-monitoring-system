@@ -1,15 +1,10 @@
 
-
 const express = require('express');
 require('dotenv').config();
 const app = express(); 
 
-
-
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
-
 
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
@@ -681,37 +676,6 @@ app.get('/api/requirements/:studentId', (req, res) => {
 });
 app.use('/requirements', express.static(uploadDir));
 
-app.get('/api/requirements/file/:id', (req, res) => {
-  const id = req.params.id;
-
-  const sql = `SELECT file_path FROM requirements WHERE id = ?`;
-
-  db.get(sql, [id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: "File not found" });
-
-    const filePath = path.join(uploadDir, row.file_path);  // path in database
-    res.sendFile(path.resolve(filePath));
-  });
-});
-
-app.get('/api/requirements/file/:id', (req, res) => {
-  const id = req.params.id;
-
-  const sql = `SELECT filename FROM requirements WHERE id = ?`;
-
-  db.get(sql, [id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row || !row.filename) return res.status(404).json({ error: "File not found" });
-
-    // File location: /uploads/<filename>
-    const filePath = path.join(uploadDir, row.filename);
-
-    res.sendFile(path.resolve(filePath));
-  });
-});
-
-
 // CREATE/ADD a daily log
 app.post('/api/dailylogs', (req, res) => {
   const { userId, date, title, desc, img, comments } = req.body;
@@ -910,7 +874,7 @@ app.post('/api/admins/forgot-password', async (req, res) => {
       if (err2) return res.status(500).json({ error: err2.message });
 
       // Compose reset link
-      const resetLink = `https://slsu-ojt-monitoring-system-1.onrender.com/api/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+      const resetLink = `https://slsu-ojt-monitoring-system-1.onrender.com/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
 
       // Compose email
       const mailOptions = {
@@ -1168,29 +1132,11 @@ app.delete('/api/faqs/:id', (req, res) => {
   });
 });
 
-app.get('/', (req, res) => {
-  res.send('SLSU OJT Monitoring System is running!');
-});
+// Make sure the PUT endpoint /api/faqs/:id accepts and updates the question field.
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Serve index.html on root
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
 
 app.listen(4000, () => console.log('Server running on port 4000'));
+
 
 
 
