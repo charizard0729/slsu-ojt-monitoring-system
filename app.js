@@ -666,6 +666,21 @@ app.post('/api/requirements', upload.single('file'), (req, res) => {
   );
 });
 
+app.get('/api/requirements', (req, res) => {
+  db.all(`SELECT * FROM requirements`, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+app.get('/api/requirements/:studentId', (req, res) => {
+  db.all(`SELECT * FROM requirements WHERE studentId = ?`, [req.params.studentId], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+app.use('/requirements', express.static(uploadDir));
+
 app.get('/api/requirements/file/:id', (req, res) => {
   const id = req.params.id;
 
@@ -691,63 +706,9 @@ app.get('/api/requirements/file/:id', (req, res) => {
 
     // File location: /uploads/<filename>
     const filePath = path.join(uploadDir, row.filename);
-    
+
     res.sendFile(path.resolve(filePath));
   });
-});
-
-app.get('/api/requirements/file/:id', (req, res) => {
-  const id = req.params.id;
-  const sql = `SELECT filename FROM requirements WHERE id = ?`;
-
-  db.get(sql, [id], (err, row) => {
-    if (err) {
-      console.error('[FILE] DB error: ', err && err.message ? err.message : err);
-      return res.status(500).json({ error: 'Database error' });
-    }
-    if (!row || !row.filename) {
-      return res.status(404).json({ error: 'File not found' });
-    }
-
-    const safeFilename = path.basename(row.filename); // sanitize
-    const filePath = path.join(uploadDir, safeFilename);
-    
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: 'File not found on disk' });
-    }
-
-    return res.sendFile(path.resolve(filePath), (sendErr) => {
-      if (sendErr) {
-        console.error('[FILE] sendFile error for', filePath, sendErr);
-        if (!res.headersSent) res.status(500).json({ error: 'Failed to send file' });
-      }
-    });
-  });
-});
-
-// Support URLs like: /api/requirements/:studentId/file/:filename
-app.get('/api/requirements/:studentId/file/:filename', (req, res) => {
-  try {
-    // decode + sanitize filename from URL
-    const rawFilename = req.params.filename || '';
-    const filename = decodeURIComponent(rawFilename);
-   const safeFilename = path.basename(filename);
-    const filePath = path.join(uploadDir, safeFilename);
-
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: 'File not found' });
-    }
-
-    return res.sendFile(path.resolve(filePath), (err) => {
-      if (err) {
-        console.error('[FILE] sendFile error for', filePath, err);
-        if (!res.headersSent) res.status(500).json({ error: 'Failed to send file' });
-      }
-    });
-  } catch (err) {
-   console.error('[FILE] Unexpected error in /api/requirements/:studentId/file/:filename', err);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
 });
 
 
