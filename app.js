@@ -681,6 +681,21 @@ app.get('/api/requirements/:studentId', (req, res) => {
 });
 app.use('/requirements', express.static(uploadDir));
 
+app.get('/api/requirements/file/:id', (req, res) => {
+  const id = req.params.id;
+
+  const sql = `SELECT file_path FROM requirements WHERE id = ?`;
+
+  db.get(sql, [id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: "File not found" });
+
+    const filePath = path.join(uploadDir, row.file_path);  // path in database
+    res.sendFile(path.resolve(filePath));
+  });
+});
+
+
 // CREATE/ADD a daily log
 app.post('/api/dailylogs', (req, res) => {
   const { userId, date, title, desc, img, comments } = req.body;
