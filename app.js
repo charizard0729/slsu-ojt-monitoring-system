@@ -695,6 +695,22 @@ app.get('/api/requirements/file/:id', (req, res) => {
   });
 });
 
+app.get('/api/requirements/file/:id', (req, res) => {
+  const id = req.params.id;
+
+  const sql = `SELECT filename FROM requirements WHERE id = ?`;
+
+  db.get(sql, [id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row || !row.filename) return res.status(404).json({ error: "File not found" });
+
+    // File location: /uploads/<filename>
+    const filePath = path.join(uploadDir, row.filename);
+
+    res.sendFile(path.resolve(filePath));
+  });
+});
+
 
 // CREATE/ADD a daily log
 app.post('/api/dailylogs', (req, res) => {
