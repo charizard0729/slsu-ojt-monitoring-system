@@ -879,7 +879,7 @@ app.post('/api/admins/forgot-password', async (req, res) => {
       if (err2) return res.status(500).json({ error: err2.message });
 
       // Compose reset link
-      const resetLink = `http://localhost:4000/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+      const resetLink = `https://slsu-ojt-monitoring-system-1.onrender.com/api/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
 
       // Compose email
       const mailOptions = {
